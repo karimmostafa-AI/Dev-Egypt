@@ -2,6 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Medical Uniform Theme Variables */
+@layer base {
+  :root {
+    /* Primary purple theme for medical uniforms */
+    --primary: 147 51 234; /* Purple-600 */
+    --primary-foreground: 255 255 255;
+    
+    /* Secondary blue theme */
+    --secondary: 59 130 246; /* Blue-500 */
+    --secondary-foreground: 255 255 255;
+    
+    /* Accent colors for medical categories */
+    --accent-scrubs: 147 51 234; /* Purple for scrubs */
+    --accent-lab-coats: 59 130 246; /* Blue for lab coats */
+    --accent-footwear: 16 185 129; /* Green for footwear */
+    --accent-accessories: 245 158 11; /* Orange for accessories */
+    
+    /* Sale and promotional colors */
+    --sale-red: 239 68 68; /* Red-500 */
+    --sale-orange: 249 115 22; /* Orange-500 */
+    
+    /* Trust and healthcare colors */
+    --healthcare-green: 34 197 94; /* Green-500 */
+    --professional-navy: 30 58 138; /* Blue-900 */
+    
+    /* Background variations */
+    --bg-medical-light: 248 250 252; /* Slate-50 */
+    --bg-medical-section: 241 245 249; /* Slate-100 */
+  }
+}
+
+/* Custom medical uniform styling */
+@layer components {
+  .medical-card {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .medical-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .sale-badge {
+    @apply medical-badge bg-red-600 text-white;
+  }
+  
+  .category-scrubs {
+    @apply text-purple-600 bg-purple-50 border-purple-200;
+  }
+  
+  .category-lab-coats {
+    @apply text-blue-600 bg-blue-50 border-blue-200;
+  }
+  
+  .category-footwear {
+    @apply text-green-600 bg-green-50 border-green-200;
+  }
+  
+  .category-accessories {
+    @apply text-orange-600 bg-orange-50 border-orange-200;
+  }
+  
+  .healthcare-gradient {
+    @apply bg-gradient-to-r from-purple-600 to-blue-600;
+  }
+  
+  .medical-text-primary {
+    @apply text-purple-600;
+  }
+  
+  .medical-text-secondary {
+    @apply text-blue-600;
+  }
+  
+  .medical-hover {
+    @apply hover:text-purple-600 transition-colors duration-200;
+  }
+}
+
+/* Medical professional styling enhancements */
+@layer utilities {
+  .text-medical-primary {
+    color: rgb(147 51 234);
+  }
+  
+  .bg-medical-primary {
+    background-color: rgb(147 51 234);
+  }
+  
+  .border-medical-primary {
+    border-color: rgb(147 51 234);
+  }
+  
+  .shadow-medical {
+    box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.1), 0 2px 4px -1px rgba(147, 51, 234, 0.06);
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

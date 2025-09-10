@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ProductCard, { ProductCardSkeleton } from '@/components/product-card'
-import { mockProducts, searchProducts, mockBrands, Product } from '@/data/mock'
+import { mockProducts, searchProducts, mockBrands, mockCategories, getProductsByCategory, getProductsByGender, getSaleProducts, Product } from '@/data/mock'
 import { Search, Grid, List } from 'lucide-react'
 
 function ProductsPageContent() {
@@ -15,6 +15,9 @@ function ProductsPageContent() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts)
   const [searchQuery, setSearchQuery] = useState(searchParams?.get('search') || '')
   const [selectedBrand, setSelectedBrand] = useState<string>('')
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams?.get('category') || '')
+  const [selectedGender, setSelectedGender] = useState<string>(searchParams?.get('gender') || '')
+  const [showSaleOnly, setShowSaleOnly] = useState<boolean>(searchParams?.get('sale') === 'true')
   const [sortBy, setSortBy] = useState<string>('newest')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isLoading] = useState(false)
@@ -28,9 +31,26 @@ function ProductsPageContent() {
       filtered = searchProducts(searchQuery)
     }
 
+    // Apply sale filter
+    if (showSaleOnly) {
+      filtered = filtered.filter(product => product.isOnSale)
+    }
+
     // Apply brand filter
     if (selectedBrand) {
       filtered = filtered.filter(product => product.brandId === selectedBrand)
+    }
+
+    // Apply category filter
+    if (selectedCategory) {
+      filtered = filtered.filter(product => product.category === selectedCategory)
+    }
+
+    // Apply gender filter
+    if (selectedGender) {
+      filtered = filtered.filter(product => 
+        product.gender === selectedGender || product.gender === 'unisex'
+      )
     }
 
     // Apply sorting
@@ -52,15 +72,18 @@ function ProductsPageContent() {
     }
 
     setFilteredProducts(filtered)
-  }, [searchQuery, selectedBrand, sortBy, products])
+  }, [searchQuery, selectedBrand, selectedCategory, selectedGender, showSaleOnly, sortBy, products])
 
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedBrand('')
+    setSelectedCategory('')
+    setSelectedGender('')
+    setShowSaleOnly(false)
     setSortBy('newest')
   }
 
-  const hasActiveFilters = searchQuery || selectedBrand || sortBy !== 'newest'
+  const hasActiveFilters = searchQuery || selectedBrand || selectedCategory || selectedGender || showSaleOnly || sortBy !== 'newest'
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -73,13 +96,13 @@ function ProductsPageContent() {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg border p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg border p-6 mb-8 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
-          <div className="relative">
+          <div className="relative lg:col-span-2">
             <Input
               type="search"
-              placeholder="Search products..."
+              placeholder="Search medical uniforms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -87,11 +110,37 @@ function ProductsPageContent() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           </div>
 
+          {/* Category Filter */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">All Categories</option>
+            {mockCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Gender Filter */}
+          <select
+            value={selectedGender}
+            onChange={(e) => setSelectedGender(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">All Genders</option>
+            <option value="women">Women</option>
+            <option value="men">Men</option>
+            <option value="unisex">Unisex</option>
+          </select>
+
           {/* Brand Filter */}
           <select
             value={selectedBrand}
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">All Brands</option>
             {mockBrands.map((brand) => (
@@ -105,7 +154,7 @@ function ProductsPageContent() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="newest">Newest First</option>
             <option value="price-low">Price: Low to High</option>
@@ -113,33 +162,53 @@ function ProductsPageContent() {
             <option value="name">Name A-Z</option>
             <option value="brand">Brand A-Z</option>
           </select>
+        </div>
 
-          {/* View Mode and Clear */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="flex-1"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="flex-1"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+        {/* Second Row - Sale Filter, View Mode, Clear */}
+        <div className="flex flex-wrap items-center justify-between mt-4 pt-4 border-t">
+          <div className="flex items-center space-x-4">
+            {/* Sale Filter */}
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={showSaleOnly}
+                onChange={(e) => setShowSaleOnly(e.target.checked)}
+                className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <span className="text-sm font-medium text-red-600">Sale Items Only</span>
+            </label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            {/* View Mode */}
+            <div className="flex gap-1 border rounded-md">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Clear Filters */}
             {hasActiveFilters && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={clearFilters}
-                className="whitespace-nowrap"
+                className="text-red-600 border-red-600 hover:bg-red-50"
               >
-                Clear
+                Clear All Filters
               </Button>
             )}
           </div>
@@ -150,17 +219,32 @@ function ProductsPageContent() {
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="text-sm text-gray-600">Active filters:</span>
             {searchQuery && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                 Search: &quot;{searchQuery}&quot;
               </Badge>
             )}
+            {selectedCategory && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                Category: {mockCategories.find(c => c.id === selectedCategory)?.name}
+              </Badge>
+            )}
+            {selectedGender && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                Gender: {selectedGender.charAt(0).toUpperCase() + selectedGender.slice(1)}
+              </Badge>
+            )}
             {selectedBrand && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
                 Brand: {mockBrands.find(b => b.id === selectedBrand)?.name}
               </Badge>
             )}
+            {showSaleOnly && (
+              <Badge className="bg-red-600 text-white">
+                Sale Items Only
+              </Badge>
+            )}
             {sortBy !== 'newest' && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="bg-gray-100 text-gray-800">
                 Sort: {sortBy.replace('-', ' ')}
               </Badge>
             )}

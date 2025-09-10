@@ -32,10 +32,17 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
     }).format(price)
   }
 
+  const formatOriginalPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(price)
+  }
+
   if (variant === 'compact') {
     return (
       <Link href={`/products/${product.id}`} className="group">
-        <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 border-gray-200">
           <div className="relative">
             <Image
               src={product.image}
@@ -52,13 +59,27 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
                 Out of Stock
               </Badge>
             )}
+            {product.isOnSale && product.salePercentage && (
+              <Badge
+                className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold"
+              >
+                {product.salePercentage}% OFF
+              </Badge>
+            )}
           </div>
           <CardContent className="p-3">
-            <h3 className="font-medium text-sm line-clamp-2 group-hover:text-blue-600 transition-colors">
+            <p className="text-xs text-purple-600 font-medium mb-1">{product.brand.name}</p>
+            <h3 className="font-medium text-sm line-clamp-2 group-hover:text-purple-600 transition-colors">
               {product.name}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">{product.brand.name}</p>
-            <p className="font-bold text-sm mt-1">{formatPrice(product.price)}</p>
+            <div className="flex items-center space-x-2 mt-2">
+              <p className="font-bold text-sm">{formatPrice(product.price)}</p>
+              {product.originalPrice && (
+                <p className="text-xs text-gray-500 line-through">
+                  {formatOriginalPrice(product.originalPrice)}
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </Link>
@@ -67,7 +88,7 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
 
   return (
     <Link href={`/products/${product.id}`} className="group">
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 border-gray-200">
         <div className="relative">
           <Image
             src={product.image}
@@ -84,12 +105,19 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
               Out of Stock
             </Badge>
           )}
-          {product.category && (
+          {product.isOnSale && product.salePercentage && (
+            <Badge
+              className="absolute top-3 left-3 bg-red-600 text-white font-bold"
+            >
+              {product.salePercentage}% OFF
+            </Badge>
+          )}
+          {product.colors && product.colors.length > 1 && (
             <Badge
               variant="outline"
-              className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm"
+              className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-xs"
             >
-              {product.category}
+              {product.colors.length} Colors
             </Badge>
           )}
           
@@ -109,24 +137,49 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
         </div>
         
         <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
-                {product.name}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">{product.brand.name}</p>
-            </div>
+          <div className="mb-2">
+            <p className="text-sm text-purple-600 font-medium mb-1">{product.brand.name}</p>
+            <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-purple-600 transition-colors mb-2">
+              {product.name}
+            </h3>
           </div>
           
           <p className="text-sm text-gray-700 line-clamp-2 mb-3">
             {product.description}
           </p>
           
+          {/* Colors available */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1">Available in {product.colors.length} color{product.colors.length > 1 ? 's' : ''}</p>
+              <div className="flex space-x-1">
+                {product.colors.slice(0, 4).map((color, index) => (
+                  <div
+                    key={index}
+                    className="w-4 h-4 rounded-full border border-gray-300"
+                    style={{ backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : color.toLowerCase() }}
+                    title={color}
+                  />
+                ))}
+                {product.colors.length > 4 && (
+                  <div className="text-xs text-gray-500 ml-1">+{product.colors.length - 4}</div>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-gray-900">
-                {formatPrice(product.price)}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-bold text-gray-900">
+                  {formatPrice(product.price)}
+                </span>
+                {product.originalPrice && (
+                  <span className="text-sm text-gray-500 line-through">
+                    {formatOriginalPrice(product.originalPrice)}
+                  </span>
+                )}
+              </div>
               {itemQuantity > 0 && (
                 <span className="text-xs text-green-600 font-medium">
                   {itemQuantity} in cart
