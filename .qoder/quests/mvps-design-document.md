@@ -600,605 +600,188 @@ interface UserStore {
 ```mermaid
 graph TB
     DataLayer --> MockDataLayer[Mock Data Layer - Current]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    DataLayer --> FutureAPILayer[Future API Layer]
+    
+    MockDataLayer --> ProductsData[products.json equivalent]
+    MockDataLayer --> BrandsData[brands.json equivalent]
+    MockDataLayer --> CategoriesData[categories.json equivalent]
+    MockDataLayer --> PromoBannersData[promoBanners.json equivalent]
+    
+    MockDataLayer --> HelperFunctions[Data Helper Functions]
+    HelperFunctions --> GetProductById[getProductById()]
+    HelperFunctions --> GetBrandBySlug[getBrandBySlug()]
+    HelperFunctions --> SearchProducts[searchProducts()]
+    HelperFunctions --> GetProductsByBrand[getProductsByBrand()]
+    HelperFunctions --> GetSaleProducts[getSaleProducts()]
+    HelperFunctions --> GetFeaturedProducts[getFeaturedProducts()]
+    
+    FutureAPILayer --> ProductsAPI[/api/products]
+    FutureAPILayer --> BrandsAPI[/api/brands]
+    FutureAPILayer --> OrdersAPI[/api/orders]
+    FutureAPILayer --> AuthAPI[/api/auth]
+```
+
+### Current Data Helper Functions
+```typescript
+// Product Helpers
+export const getProductById = (id: string): Product | undefined
+export const getBrandById = (id: string): Brand | undefined
+export const getBrandBySlug = (slug: string): Brand | undefined
+export const getProductsByBrand = (brandId: string): Product[]
+export const getProductsByBrandSlug = (slug: string): Product[]
+export const searchProducts = (query: string): Product[]
+
+// Category Helpers
+export const getCategoryById = (id: string): Category | undefined
+export const getCategoryBySlug = (slug: string): Category | undefined
+export const getProductsByCategory = (categoryId: string): Product[]
+export const getProductsByCategorySlug = (slug: string): Product[]
+export const getProductsByGender = (gender: 'women' | 'men' | 'unisex'): Product[]
+
+// Featured Content
+export const getSaleProducts = (): Product[]
+export const getFeaturedProducts = (limit: number = 8): Product[]
+export const getPromoBanners = (): PromoBanner[]
+```
+
+### Future API Endpoints Structure
+```
+GET /api/products - List all products with filtering and pagination
+GET /api/products/[id] - Get single product details
+GET /api/products/search?q=[query] - Search products
+GET /api/products/featured - Get featured products
+GET /api/products/sale - Get sale products
+
+GET /api/brands - List all brands
+GET /api/brands/[slug] - Get brand details
+GET /api/brands/[slug]/products - Get products by brand
+
+GET /api/categories - List all categories
+GET /api/categories/[slug]/products - Get products by category
+
+POST /api/cart - Add item to cart
+PUT /api/cart/[itemId] - Update cart item
+DELETE /api/cart/[itemId] - Remove cart item
+GET /api/cart - Get cart contents
+
+POST /api/orders - Create new order
+GET /api/orders/[id] - Get order details
+GET /api/users/[id]/orders - Get user orders
+
+POST /api/auth/login - User login
+POST /api/auth/register - User registration
+POST /api/auth/logout - User logout
+GET /api/auth/me - Get current user
+```
+
+## Performance Optimization
+
+### Next.js Performance Features
+```mermaid
+graph TB
+    Performance --> ImageOptimization[Image Optimization]
+    Performance --> CodeSplitting[Code Splitting]
+    Performance --> StaticGeneration[Static Generation]
+    Performance --> Caching[Caching Strategy]
+    
+    ImageOptimization --> NextImage[next/image Component]
+    ImageOptimization --> AutoWebP[Automatic WebP Conversion]
+    ImageOptimization --> ResponsiveImages[Responsive Image Loading]
+    ImageOptimization --> LazyLoading[Lazy Loading by Default]
+    
+    CodeSplitting --> DynamicImports[Dynamic Component Imports]
+    CodeSplitting --> RouteBasedSplitting[Route-based Code Splitting]
+    CodeSplitting --> ComponentLazyLoading[Component Lazy Loading]
+    
+    StaticGeneration --> StaticPages[Static Page Generation]
+    StaticGeneration --> ISR[Incremental Static Regeneration]
+    StaticGeneration --> ProductPages[Product Page Optimization]
+    
+    Caching --> StaticAssets[Static Asset Caching]
+    Caching --> APIResponseCaching[API Response Caching]
+    Caching --> BrowserCaching[Browser Caching Headers]
+```
+
+### Current Performance Implementation
+- **Image Optimization**: All product images use Next.js `Image` component with automatic optimization
+- **Component Lazy Loading**: Heavy components loaded dynamically when needed
+- **State Persistence**: Cart state persisted to localStorage to prevent data loss
+- **Search Optimization**: Debounced search to prevent excessive API calls
+- **Mobile Performance**: Mobile-first responsive design with optimized touch interactions
+
+## Security & Authentication
+
+### Current Authentication Implementation
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client
+    participant LocalStorage
+    participant UserStore
+    
+    User->>Client: Navigate to /auth
+    User->>Client: Enter credentials
+    Client->>UserStore: Call login() action
+    UserStore->>LocalStorage: Persist user data
+    UserStore-->>Client: Update isLoggedIn state
+    Client-->>User: Redirect to dashboard
+    
+    User->>Client: Browse protected content
+    Client->>UserStore: Check isLoggedIn
+    UserStore->>LocalStorage: Verify stored session
+    LocalStorage-->>UserStore: Return user data
+    UserStore-->>Client: Confirm authentication
+    Client-->>User: Show protected content
+```
+
+### Security Measures Implementation
+- **Client-side State Management**: Secure user session handling with Zustand persistence
+- **Input Validation**: Form validation for all user inputs
+- **XSS Prevention**: React's built-in XSS protection mechanisms
+- **CSRF Protection**: Next.js built-in CSRF protection for forms
+- **Secure Data Handling**: No sensitive data stored in localStorage (passwords, payment info)
+- **Authentication State**: Proper session management with automatic cleanup
+
+## Testing Strategy
+
+### Testing Architecture
+```mermaid
+graph TB
+    Testing --> ComponentTesting[Component Testing]
+    Testing --> IntegrationTesting[Integration Testing]
+    Testing --> E2ETesting[End-to-End Testing]
+    
+    ComponentTesting --> UnitTests[Unit Tests]
+    ComponentTesting --> ComponentInteraction[Component Interaction Tests]
+    
+    UnitTests --> ProductCard[Product Card Tests]
+    UnitTests --> CartStore[Cart Store Tests]
+    UnitTests --> SearchFunctionality[Search Function Tests]
+    UnitTests --> DataHelpers[Data Helper Tests]
+    
+    IntegrationTesting --> UserFlow[User Flow Tests]
+    IntegrationTesting --> CartIntegration[Cart Integration Tests]
+    IntegrationTesting --> NavigationFlow[Navigation Flow Tests]
+    
+    E2ETesting --> CheckoutFlow[Complete Checkout Flow]
+    E2ETesting --> BrandNavigation[Brand Navigation Flow]
+    E2ETesting --> ProductSearch[Product Search Flow]
+    E2ETesting --> MobileExperience[Mobile User Experience]
+```
+
+### Recommended Testing Tools
+- **Jest**: Unit testing framework for JavaScript/TypeScript
+- **React Testing Library**: Component testing utilities with accessibility focus
+- **Playwright**: End-to-end testing with cross-browser support
+- **MSW (Mock Service Worker)**: API mocking for integration tests
+- **Storybook**: Component development and visual testing environment
+
+### Key Test Scenarios
+1. **Cart Functionality**: Add/remove items, quantity updates, persistence
+2. **Product Search**: Search accuracy, filters, performance
+3. **Brand Navigation**: Brand page routing, product filtering
+4. **Responsive Design**: Mobile navigation, touch interactions
+5. **Authentication Flow**: Login/logout, session persistence
+6. **Checkout Process**: Form validation, order creation
+7. **Performance**: Page load times, image optimization
+8. **Accessibility**: Screen reader compatibility, keyboard navigation
